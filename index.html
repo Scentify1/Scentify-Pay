@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scentify Payment</title>
 
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-45YJSJL894"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-45YJSJL894', {
+    send_page_view: true
+  });
+</script>
+
 <style>
 body {
   margin: 0;
@@ -13,7 +23,6 @@ body {
   color: #fff;
 }
 
-/* HEADER */
 .header {
   text-align: center;
   padding: 30px 20px 10px;
@@ -30,7 +39,6 @@ body {
   font-size: 14px;
 }
 
-/* CARD */
 .card {
   background: #ffffff;
   color: #000;
@@ -40,7 +48,6 @@ body {
   box-shadow: 0 10px 25px rgba(0,0,0,0.25);
 }
 
-/* BANK HEADER */
 .bank-header {
   display: flex;
   align-items: center;
@@ -61,7 +68,6 @@ body {
   margin-left: 10px;
 }
 
-/* ACCOUNT ROW */
 .account {
   display: flex;
   justify-content: space-between;
@@ -79,7 +85,6 @@ body {
   font-weight: bold;
 }
 
-/* BUTTON */
 button {
   background: #061539;
   color: #d4af37;
@@ -101,7 +106,6 @@ button.copied {
   color: #fff;
 }
 
-/* ripple */
 button::after {
   content: "";
   position: absolute;
@@ -122,14 +126,12 @@ button:active::after {
   transition: 0.4s;
 }
 
-/* OPTIONAL SECTION */
 .footer-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* TEXT SMALL */
 .small {
   color: #666;
   font-size: 14px;
@@ -147,7 +149,7 @@ button:active::after {
 <!-- BML -->
 <div class="card">
   <div class="bank-header">
-    <img src="bml-logo.png">
+    <img src="bml-logo.png" alt="BML">
     <div>
       <b>Bank of Maldives</b>
       <span class="badge">PRIMARY</span><br>
@@ -160,7 +162,7 @@ button:active::after {
       <div class="currency">MVR</div>
       <b id="bml_mvr">7730000170957</b>
     </div>
-    <button onclick="copyText(event, 'bml_mvr', this)">Copy</button>
+    <button onclick="copyText(event, 'bml_mvr', this, 'BML MVR Account')">Copy</button>
   </div>
 
   <div class="account">
@@ -168,14 +170,14 @@ button:active::after {
       <div class="currency">USD</div>
       <b id="bml_usd">7730000555835</b>
     </div>
-    <button onclick="copyText(event, 'bml_usd', this)">Copy</button>
+    <button onclick="copyText(event, 'bml_usd', this, 'BML USD Account')">Copy</button>
   </div>
 </div>
 
 <!-- MIB -->
 <div class="card">
   <div class="bank-header">
-    <img src="mib-logo.png">
+    <img src="mib-logo.png" alt="MIB">
     <div>
       <b>Maldives Islamic Bank</b><br>
       <span class="small">Account Name: Scentify</span>
@@ -187,40 +189,77 @@ button:active::after {
       <div class="currency">MVR</div>
       <b id="mib_mvr">90101400052171001</b>
     </div>
-    <button onclick="copyText(event, 'mib_mvr', this)">Copy</button>
+    <button onclick="copyText(event, 'mib_mvr', this, 'MIB MVR Account')">Copy</button>
   </div>
 </div>
 
-<!-- OPTIONAL -->
+<!-- SLIP -->
 <div class="card footer-card">
   <div>
     <b>Send payment confirmation (optional)</b><br>
     <span class="small">WhatsApp or Viber</span><br>
     <b id="phone">+960 7700062</b>
   </div>
-  <button onclick="copyText(event, 'phone', this)">Copy</button>
+  <button onclick="copyText(event, 'phone', this, 'Phone Number')">Copy</button>
 </div>
 
 <script>
-function copyText(e, id, btn) {
-  const text = document.getElementById(id).innerText;
-  navigator.clipboard.writeText(text);
+  // ── Time tracking ──────────────────────────────────────────
+  const pageOpenTime = Date.now();
 
-  // ripple position
-  const rect = btn.getBoundingClientRect();
-  btn.style.setProperty('--x', (e.clientX - rect.left) + 'px');
-  btn.style.setProperty('--y', (e.clientY - rect.top) + 'px');
+  window.addEventListener('beforeunload', () => {
+    const secondsSpent = Math.round((Date.now() - pageOpenTime) / 1000);
+    gtag('event', 'time_on_page', {
+      event_category: 'Engagement',
+      event_label: 'Seconds on page',
+      value: secondsSpent
+    });
+  });
 
-  // feedback
-  const original = btn.innerText;
-  btn.innerText = "Copied ✓";
-  btn.classList.add("copied");
+  // ── Scroll depth ───────────────────────────────────────────
+  let maxScroll = 0;
+  window.addEventListener('scroll', () => {
+    const scrolled = Math.round((window.scrollY + window.innerHeight) / document.body.scrollHeight * 100);
+    if (scrolled > maxScroll) {
+      maxScroll = scrolled;
+      if ([25, 50, 75, 100].includes(maxScroll)) {
+        gtag('event', 'scroll_depth', {
+          event_category: 'Engagement',
+          event_label: maxScroll + '% scrolled'
+        });
+      }
+    }
+  });
 
-  setTimeout(() => {
-    btn.innerText = original;
-    btn.classList.remove("copied");
-  }, 1500);
-}
+  // ── QR vs direct visit ─────────────────────────────────────
+  gtag('event', 'page_open', {
+    event_category: 'Traffic',
+    event_label: document.referrer ? 'Referral: ' + document.referrer : 'Direct / QR scan'
+  });
+
+  // ── Copy button tracking ───────────────────────────────────
+  function copyText(e, id, btn, label) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+
+    gtag('event', 'copy_button_clicked', {
+      event_category: 'Copy',
+      event_label: label,
+    });
+
+    const rect = btn.getBoundingClientRect();
+    btn.style.setProperty('--x', (e.clientX - rect.left) + 'px');
+    btn.style.setProperty('--y', (e.clientY - rect.top) + 'px');
+
+    const original = btn.innerText;
+    btn.innerText = "Copied ✓";
+    btn.classList.add("copied");
+
+    setTimeout(() => {
+      btn.innerText = original;
+      btn.classList.remove("copied");
+    }, 1500);
+  }
 </script>
 
 </body>
